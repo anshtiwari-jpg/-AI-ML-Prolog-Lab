@@ -1,4 +1,4 @@
-  Prolog Lab Experiments
+ Prolog Lab Experiments
 
 | No. | Experiment |
 |---|---|
