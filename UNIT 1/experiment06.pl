@@ -1,5 +1,5 @@
 % Experiment 06: Route Recommendation System
-% Routes are treated as two-way connections.
+% Routes are treated as two-way connections. 
 
 road(delhi, agra).
 road(agra, jaipur).
