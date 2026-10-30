@@ -1,27 +1,26 @@
-% Experiment 5: Student Performance Classification
+% Experiment 05: Student Performance Classification
+% Classification: topper (80 and above), average (40-79), fail (below 40).
 
-% Student marks
-student_marks(kishan, 85).
+student_marks(kavita, 85).
 student_marks(rahul, 72).
 student_marks(amit, 55).
 student_marks(priya, 35).
 
-% Classify student performance based on marks
-performance(Marks, excellent) :-
-    Marks >= 80.
-
-performance(Marks, good) :-
-    Marks >= 60,
-    Marks < 80.
+performance(Marks, topper) :-
+    Marks >= 80,
+    Marks =< 100.
 
 performance(Marks, average) :-
     Marks >= 40,
-    Marks < 60.
+    Marks < 80.
 
-performance(Marks, needs_improvement) :-
+performance(Marks, fail) :-
+    Marks >= 0,
     Marks < 40.
 
-% Find the performance of a student
 student_performance(Name, Result) :-
     student_marks(Name, Marks),
     performance(Marks, Result).
+
+% Sample query:
+% ?- student_performance(kavita, Result).
