@@ -1,74 +1,32 @@
-% Experiment 10: Simulated Annealing
+% Experiment 10: Blocks World
+% State representation uses on(Block, Support) and ontable(Block).
+% Example initial arrangement: A on B, B on table, C on table.
 
-:- use_module(library(random)).
+block(a).
+block(b).
+block(c).
 
-% Calculate the value of a state
-objective(X, Score) :-
-    Score is 100 - (X - 7) * (X - 7).
+initial_state([on(a,b), ontable(b), ontable(c)]).
 
-% Find neighboring states
-neighbor(X, Y) :-
-    Y is X + 1,
-    Y =< 10.
+% A block is clear if no other block is on it.
+clear(Block, State) :-
+    block(Block),
+    \+ member(on(_, Block), State).
 
-neighbor(X, Y) :-
-    Y is X - 1,
-    Y >= 0.
+% A valid stacking move places a clear block on a clear block.
+can_move(Block, Destination, State) :-
+    block(Block),
+    block(Destination),
+    Block \\= Destination,
+    clear(Block, State),
+    clear(Destination, State),
+    member(on(Block, _), State).
 
-% Choose a random neighbor
-random_neighbor(X, Y) :-
-    findall(N, neighbor(X, N), Neighbors),
-    random_member(Y, Neighbors).
+% Check whether a proposed state contains no block on itself.
+valid_state(State) :-
+    \+ member(on(X, X), State).
 
-% Decide whether to accept a new state
-accept_move(Delta, _) :-
-    Delta >= 0,
-    !.
-
-accept_move(Delta, Temp) :-
-    Probability is exp(Delta / Temp),
-    random(R),
-    R < Probability.
-
-% Start simulated annealing
-simulated_annealing(Start, Best, BestScore) :-
-    objective(Start, Score),
-    anneal(Start, Score, Start, Score, 10.0, 100,
-           Best, BestScore).
-
-% Stop when the temperature is low or steps are finished
-anneal(_, _, Best, BestScore, Temp, Steps, Best, BestScore) :-
-    (Steps =< 0 ; Temp < 0.01),
-    !.
-
-% Search for a better solution
-anneal(Current, CurrentScore, Best, BestScore,
-       Temp, Steps, FinalBest, FinalScore) :-
-
-    random_neighbor(Current, Next),
-    objective(Next, NextScore),
-
-    Delta is NextScore - CurrentScore,
-
-    (accept_move(Delta, Temp) ->
-        NewCurrent = Next,
-        NewCurrentScore = NextScore
-    ;
-        NewCurrent = Current,
-        NewCurrentScore = CurrentScore
-    ),
-
-    (NextScore > BestScore ->
-        NewBest = Next,
-        NewBestScore = NextScore
-    ;
-        NewBest = Best,
-        NewBestScore = BestScore
-    ),
-
-    NewTemp is Temp * 0.95,
-    NewSteps is Steps - 1,
-
-    anneal(NewCurrent, NewCurrentScore,
-           NewBest, NewBestScore,
-           NewTemp, NewSteps, FinalBest, FinalScore).
+% Sample queries:
+% ?- initial_state(State), clear(c, State).
+% ?- initial_state(State), can_move(a, c, State).
+% ?- valid_state([on(a,b), ontable(b), ontable(c)]).
