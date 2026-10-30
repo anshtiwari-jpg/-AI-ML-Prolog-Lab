@@ -1,35 +1,29 @@
-% Experiment 6: Breadth-First Search
+% Experiment 06: Route Recommendation System
+% Routes are treated as two-way connections.
 
-% Graph connections
-edge(a, b).
-edge(a, c).
-edge(b, d).
-edge(b, e).
-edge(c, f).
-edge(e, g).
-edge(f, g).
-
-% Check connections in both directions
-connected(X, Y) :-
-    edge(X, Y).
+road(delhi, agra).
+road(agra, jaipur).
+road(delhi, chandigarh).
+road(chandigarh, manali).
+road(jaipur, udaipur).
+road(agra, lucknow).
 
 connected(X, Y) :-
-    edge(Y, X).
+    road(X, Y).
+connected(X, Y) :-
+    road(Y, X).
 
-% Start the BFS search
-bfs(Start, Goal, Path) :-
-    bfs_queue([[Start]], Goal, RevPath),
+% Find a route without visiting a city more than once
+route(Start, Goal, Path) :-
+    route_path(Start, Goal, [Start], RevPath),
     reverse(RevPath, Path).
 
-% Check whether the goal is reached
-bfs_queue([[Goal|Rest]|_], Goal, [Goal|Rest]).
+route_path(Goal, Goal, Visited, Visited).
 
-% Explore the next nodes
-bfs_queue([Path|Queue], Goal, Result) :-
-    Path = [Current|_],
-    findall([Next|Path],
-            (connected(Current, Next),
-             \+ member(Next, Path)),
-            NewPaths),
-    append(Queue, NewPaths, UpdatedQueue),
-    bfs_queue(UpdatedQueue, Goal, Result).
+route_path(Current, Goal, Visited, Path) :-
+    connected(Current, Next),
+    \+ member(Next, Visited),
+    route_path(Next, Goal, [Next|Visited], Path).
+
+% Sample query:
+% ?- route(delhi, manali, Path).
