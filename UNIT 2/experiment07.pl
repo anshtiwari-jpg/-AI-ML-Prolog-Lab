@@ -1,6 +1,6 @@
-% Experiment 7: Greedy Best-First Search
+% Experiment 07: Breadth-First Search (BFS)
+% BFS finds a shortest path in an unweighted graph.
 
-% Graph connections
 edge(a, b).
 edge(a, c).
 edge(b, d).
@@ -9,51 +9,23 @@ edge(c, f).
 edge(e, g).
 edge(f, g).
 
-% Heuristic values for reaching goal g
-heuristic(a, 5).
-heuristic(b, 4).
-heuristic(c, 2).
-heuristic(d, 6).
-heuristic(e, 1).
-heuristic(f, 1).
-heuristic(g, 0).
+connected(X, Y) :- edge(X, Y).
+connected(X, Y) :- edge(Y, X).
 
-% Start the search
-greedy_search(Start, Goal, Path) :-
-    greedy([[Start]], Goal, [], RevPath),
+bfs(Start, Goal, Path) :-
+    bfs_queue([[Start]], Goal, RevPath),
     reverse(RevPath, Path).
 
-% Find the path with the lowest heuristic value
-best_path([Path|Paths], BestPath) :-
-    best_path(Paths, Path, BestPath).
+bfs_queue([[Goal|Rest]|_], Goal, [Goal|Rest]).
 
-best_path([], BestPath, BestPath).
-
-best_path([Path|Paths], CurrentBest, BestPath) :-
-    Path = [Node|_],
-    CurrentBest = [CurrentNode|_],
-    heuristic(Node, H),
-    heuristic(CurrentNode, CurrentH),
-    (H < CurrentH ->
-        NextBest = Path
-    ;
-        NextBest = CurrentBest
-    ),
-    best_path(Paths, NextBest, BestPath).
-
-% Perform Greedy Best-First Search
-greedy(Paths, Goal, Visited, Path) :-
-    best_path(Paths, BestPath),
-    select(BestPath, Paths, Remaining),
-    BestPath = [Current|_],
-    (Current == Goal ->
-        Path = BestPath
-    ;
-        findall([Next|BestPath],
-            (edge(Current, Next),
-             \+ member(Next, Visited),
-             \+ member(Next, BestPath)),
+bfs_queue([Path|Queue], Goal, Result) :-
+    Path = [Current|_],
+    findall([Next|Path],
+            (connected(Current, Next),
+             \+ member(Next, Path)),
             NewPaths),
-        append(Remaining, NewPaths, UpdatedPaths),
-        greedy(UpdatedPaths, Goal, [Current|Visited], Path)
-    ).
+    append(Queue, NewPaths, UpdatedQueue),
+    bfs_queue(UpdatedQueue, Goal, Result).
+
+% Sample query:
+% ?- bfs(a, g, Path).
